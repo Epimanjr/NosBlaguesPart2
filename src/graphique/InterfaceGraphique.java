@@ -1,7 +1,9 @@
 package graphique;
 
+import blague.Blague;
 import blagueprovider.BlagueProvider;
 import codebase.BlagueProviderPairApair;
+import exception.BlagueAbsenteException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -9,6 +11,8 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.awt.Dimension;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.rmi.NotBoundException;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -118,15 +122,15 @@ public class InterfaceGraphique extends JFrame {
 
         //les informations sur les blagues
         //nom de la blague
-        JTextField nom = new JTextField();
+        final JTextField nom = new JTextField();
         blocal.add(nom);
 
         //contenu 
-        JTextField question = new JTextField();
+        final JTextField question = new JTextField();
         blocal.add(question);
 
         //reponse
-        JTextArea reponse = new JTextArea();
+        final JTextArea reponse = new JTextArea();
         reponse.setPreferredSize(new Dimension(300, 200));
         blocal.add(reponse);
 
@@ -135,6 +139,42 @@ public class InterfaceGraphique extends JFrame {
         blocal.add(bouton);
 
         local.add(blocal);
+        
+        blaguesLocales.addMouseListener(new MouseListener() {
+
+            @Override
+            public void mouseClicked(MouseEvent me) {
+            }
+
+            @Override
+            public void mousePressed(MouseEvent me) {
+                String nomblague = (String) blaguesLocales.getSelectedValue();
+                try {
+                    Blague b = bp.getBlague(nomblague);
+                    nom.setText(b.getNom());
+                    question.setText(b.getQuestion());
+                    reponse.setText(b.getReponse());
+                } catch (BlagueAbsenteException ex) {
+                    Logger.getLogger(InterfaceGraphique.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent me) {
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent me) {
+            }
+
+            @Override
+            public void mouseExited(MouseEvent me) {
+            }
+            
+        });
+        
+        local.repaint();
         return (local);
     }
 
@@ -166,7 +206,7 @@ public class InterfaceGraphique extends JFrame {
      * methode charg�e de mettre � jour l'affichage des blagues � partir de bp
      */
     public void MaJBlagues() {
-
+        blaguesLocales.setListData(bp.getAllNames());
     }
 
     /**
@@ -221,6 +261,9 @@ public class InterfaceGraphique extends JFrame {
 
                 //testUnitaire(args[0], bp);
                 System.out.println("Client lancé !");
+                
+                bp.ajoutBlague(new Blague("nom1", "question1", "reponse1"));
+                bp.ajoutBlague(new Blague("nom2", "question2", "reponse2"));
                 
                 // Création de l'interface
                 InterfaceGraphique ig = new InterfaceGraphique(bp.getNom(), bp);
