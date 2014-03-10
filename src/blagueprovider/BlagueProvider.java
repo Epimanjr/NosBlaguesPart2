@@ -8,9 +8,7 @@ package blagueprovider;
 import blague.Blague;
 import codebase.BlagueProviderPairApair;
 import exception.BlagueAbsenteException;
-import java.rmi.AccessException;
 import java.rmi.NotBoundException;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -42,7 +40,7 @@ public class BlagueProvider implements BlagueProviderPairApair {
      * le nom des autres BlagueProvider connus à leurs références distantes (ces
      * références sont à récupérer au lancement de l’application)
      */
-    private HashMap<String, BlagueProvider> listeRef;
+    private HashMap<String, BlagueProviderPairApair> listeRef;
 
     /**
      * Constructeur.
@@ -50,7 +48,10 @@ public class BlagueProvider implements BlagueProviderPairApair {
      * @param nom
      */
     public BlagueProvider(String nom) {
+        //Initialisation des attributs
         this.nom = nom;
+        this.listeBlagues = new HashMap<>();
+        this.listeRef = new HashMap<>();
     }
 
     /**
@@ -70,7 +71,7 @@ public class BlagueProvider implements BlagueProviderPairApair {
      * @param name
      * @param refname
      */
-    public void ajoutReference(String name, BlagueProvider refname) {
+    public void ajoutReference(String name, BlagueProviderPairApair refname) {
         listeRef.put(name, refname);
     }
 
@@ -170,16 +171,19 @@ public class BlagueProvider implements BlagueProviderPairApair {
                 registry = LocateRegistry.getRegistry();
 
                 for (int i = 1; i < args.length; i++) {
+                    // affichage
+                    System.out.println("Récupération de "+ args[i] + " ...");
+                    
                     // Récuperation de la reference distante
                     BlagueProviderPairApair proxy = (BlagueProviderPairApair) registry.lookup(args[i]);
 
                     // Ajout de la référence
-                    bp.ajoutReference(args[i], (BlagueProvider) proxy);
+                    bp.ajoutReference(args[i], proxy);
                 }
 
                 //Export
                 BlagueProviderPairApair ri = (BlagueProviderPairApair) UnicastRemoteObject.exportObject(bp, 0);
-                registry.rebind("Client", ri);
+                registry.rebind(args[0], ri);
 
             } catch (RemoteException | NotBoundException ex) {
                 Logger.getLogger(BlagueProvider.class.getName()).log(Level.SEVERE, null, ex);
@@ -196,11 +200,11 @@ public class BlagueProvider implements BlagueProviderPairApair {
         this.listeBlagues = listeBlagues;
     }
 
-    public HashMap<String, BlagueProvider> getListeRef() {
+    public HashMap<String, BlagueProviderPairApair> getListeRef() {
         return listeRef;
     }
 
-    public void setListeRef(HashMap<String, BlagueProvider> listeRef) {
+    public void setListeRef(HashMap<String, BlagueProviderPairApair> listeRef) {
         this.listeRef = listeRef;
     }
 
