@@ -60,7 +60,7 @@ public class BlagueProvider implements BlagueProviderPairApair {
      * @param b
      */
     public void ajoutBlague(Blague b) {
-
+        
         //On ajoute b à la hashmap
         listeBlagues.put(b.getNom(), b);
     }
@@ -108,6 +108,7 @@ public class BlagueProvider implements BlagueProviderPairApair {
      */
     @Override
     public String[] getAllNames() {
+        
         //Création du tableau résultat
         String[] res = new String[listeBlagues.size()];
 
@@ -126,6 +127,7 @@ public class BlagueProvider implements BlagueProviderPairApair {
             iterateurRes++;
         }
 
+    
         return res;
     }
 
@@ -172,8 +174,8 @@ public class BlagueProvider implements BlagueProviderPairApair {
 
                 for (int i = 1; i < args.length; i++) {
                     // affichage
-                    System.out.println("Récupération de "+ args[i] + " ...");
-                    
+                    System.out.println("Récupération de " + args[i] + " ...");
+
                     // Récuperation de la reference distante
                     BlagueProviderPairApair proxy = (BlagueProviderPairApair) registry.lookup(args[i]);
 
@@ -185,11 +187,65 @@ public class BlagueProvider implements BlagueProviderPairApair {
                 BlagueProviderPairApair ri = (BlagueProviderPairApair) UnicastRemoteObject.exportObject(bp, 0);
                 registry.rebind(args[0], ri);
 
+                testUnitaire(args[0], bp);
+                System.out.println("Client lancé !");
+
             } catch (RemoteException | NotBoundException ex) {
                 Logger.getLogger(BlagueProvider.class.getName()).log(Level.SEVERE, null, ex);
             }
 
         }
+    }
+
+    private static void testUnitaire(String name, BlagueProvider client) {
+        switch (name) {
+            case "max":
+                client.ajoutBlague(new Blague("blague1", "question1", "reponse1"));
+                client.ajoutBlague(new Blague("blague4", "question4", "reponse4"));
+                client.ajoutBlague(new Blague("blague5", "question5", "reponse5"));
+                break;
+            case "test":
+                
+                client.ajoutBlague(new Blague("blague2", "question2", "reponse2"));
+                client.ajoutBlague(new Blague("blague3", "question3", "reponse3"));
+                client.ajoutBlague(new Blague("blague6", "question6", "reponse6"));
+                break;
+        }
+        // affichage local
+        //Parcourt des blagues
+        for (String blaguename : client.getAllNames()) {
+            Blague b;
+            try {
+                b = client.getBlague(blaguename);
+                System.out.println(b.toString());
+            } catch (BlagueAbsenteException ex) {
+                Logger.getLogger(BlagueProvider.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
+
+        // Parcourt des références
+        Set cles = client.getListeRef().keySet();
+        Iterator it = cles.iterator();
+
+        while (it.hasNext()) {
+            String cle = (String) it.next();
+            BlagueProviderPairApair bppp = client.getListeRef().get(cle);
+
+            try {
+                System.out.println("Parcourt de la référence : " + bppp.getNom());
+
+                //Parcourt des blagues
+                for (String blaguename : bppp.getAllNames()) {
+                    Blague b = bppp.getBlague(blaguename);
+                    System.out.println(b);
+                }
+
+            } catch (RemoteException | BlagueAbsenteException ex) {
+                Logger.getLogger(BlagueProvider.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
     }
 
     public HashMap<String, Blague> getListeBlagues() {
