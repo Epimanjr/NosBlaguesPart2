@@ -1,8 +1,15 @@
 package graphique;
 
 import blagueprovider.BlagueProvider;
+import codebase.BlagueProviderPairApair;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.awt.Dimension;
-
+import java.rmi.NotBoundException;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -13,6 +20,8 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+
+
 
 public class InterfaceGraphique extends JFrame {
 
@@ -84,7 +93,8 @@ public class InterfaceGraphique extends JFrame {
 
     /**
      * ajoute l'onglet local � l'interface
-     * @return 
+     *
+     * @return
      */
     public JPanel ongletLocal() {
         //l'onglet local
@@ -106,7 +116,7 @@ public class InterfaceGraphique extends JFrame {
         //etiquette2
         blocal.add(new JLabel("Information blague locale"));
 
-		//les informations sur les blagues
+        //les informations sur les blagues
         //nom de la blague
         JTextField nom = new JTextField();
         blocal.add(nom);
@@ -130,6 +140,7 @@ public class InterfaceGraphique extends JFrame {
 
     /**
      * construction de l'interface
+     *
      * @param nom
      * @param bp
      */
@@ -174,9 +185,51 @@ public class InterfaceGraphique extends JFrame {
 
     }
 
-    public static void main(String args[]) {
-        InterfaceGraphique test = new InterfaceGraphique("toto", new BlagueProvider("toto"));
+    /**
+     * Méthode principale.
+     *
+     * @param args
+     */
+    public static void main(String[] args) {
+        //On test args
+        if (args.length < 1) {
+            System.out.println("Erreur : Manque un argument !");
+        } else {
+            //Création de l'objet
+            BlagueProvider bp = new BlagueProvider(args[0]);
 
+            // Ajout des références
+            //contact avec le rmiregistry de host
+            Registry registry;
+            try {
+                registry = LocateRegistry.getRegistry();
+
+                for (int i = 1; i < args.length; i++) {
+                    // affichage
+                    System.out.println("Récupération de " + args[i] + " ...");
+
+                    // Récuperation de la reference distante
+                    BlagueProviderPairApair proxy = (BlagueProviderPairApair) registry.lookup(args[i]);
+
+                    // Ajout de la référence
+                    bp.ajoutReference(args[i], proxy);
+                }
+
+                //Export
+                BlagueProviderPairApair ri = (BlagueProviderPairApair) UnicastRemoteObject.exportObject(bp, 0);
+                registry.rebind(args[0], ri);
+
+                //testUnitaire(args[0], bp);
+                System.out.println("Client lancé !");
+                
+                // Création de l'interface
+                InterfaceGraphique ig = new InterfaceGraphique(bp.getNom(), bp);
+
+            } catch (RemoteException | NotBoundException ex) {
+                Logger.getLogger(InterfaceGraphique.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
     }
 
 }
