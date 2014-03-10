@@ -8,6 +8,13 @@ package blagueprovider;
 import blague.Blague;
 import codebase.BlagueProviderPairApair;
 import exception.BlagueAbsenteException;
+import java.rmi.AccessException;
+import java.rmi.NotBoundException;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -24,7 +31,7 @@ public class BlagueProvider implements BlagueProviderPairApair {
      * Le nom du BlagueProvider
      */
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")
-    private String nom;
+    private final String nom;
 
     /**
      * Une hashmap contenant les blagues
@@ -39,6 +46,7 @@ public class BlagueProvider implements BlagueProviderPairApair {
 
     /**
      * Constructeur.
+     *
      * @param nom
      */
     public BlagueProvider(String nom) {
@@ -55,26 +63,36 @@ public class BlagueProvider implements BlagueProviderPairApair {
         //On ajoute b à la hashmap
         listeBlagues.put(b.getNom(), b);
     }
-    
-    
+
+    /**
+     * Ajout d'une référence à la liste.
+     *
+     * @param name
+     * @param refname
+     */
+    public void ajoutReference(String name, BlagueProvider refname) {
+        listeRef.put(name, refname);
+    }
+
     /**
      * Méthode qui télécharge une blague en l'ajoutant à la réf distante.
+     *
      * @param ref
-     * @param nomBlague 
+     * @param nomBlague
      */
     public void telechargeBlague(BlagueProvider ref, String nomBlague) {
-        
+
         try {
             //On récupère la blague
             Blague b = getBlague(nomBlague);
-            
+
             //On l'ajoute à la référence distance
             ref.ajoutBlague(b);
-            
+
         } catch (BlagueAbsenteException ex) {
             Logger.getLogger(BlagueProvider.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
     }
 
     @Override
@@ -131,21 +149,59 @@ public class BlagueProvider implements BlagueProviderPairApair {
         }
 
     }
-    
-    
+
     /**
      * Méthode principale.
      *
-     * @param args 
+     * @param args
      */
     public static void main(String[] args) {
         //On test args
-        if(args.length < 1) {
+        if (args.length < 1) {
             System.out.println("Erreur : Manque un argument !");
         } else {
             //Création de l'objet
             BlagueProvider bp = new BlagueProvider(args[0]);
+
+            // Ajout des références
+            //contact avec le rmiregistry de host
+            Registry registry;
+            try {
+                registry = LocateRegistry.getRegistry();
+
+                for (int i = 1; i < args.length; i++) {
+                    // Récuperation de la reference distante
+                    BlagueProviderPairApair proxy = (BlagueProviderPairApair) registry.lookup(args[i]);
+
+                    // Ajout de la référence
+                    bp.ajoutReference(args[i], (BlagueProvider) proxy);
+                }
+
+                //Export
+                BlagueProviderPairApair ri = (BlagueProviderPairApair) UnicastRemoteObject.exportObject(bp, 0);
+                registry.rebind("Client", ri);
+
+            } catch (RemoteException | NotBoundException ex) {
+                Logger.getLogger(BlagueProvider.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
         }
+    }
+
+    public HashMap<String, Blague> getListeBlagues() {
+        return listeBlagues;
+    }
+
+    public void setListeBlagues(HashMap<String, Blague> listeBlagues) {
+        this.listeBlagues = listeBlagues;
+    }
+
+    public HashMap<String, BlagueProvider> getListeRef() {
+        return listeRef;
+    }
+
+    public void setListeRef(HashMap<String, BlagueProvider> listeRef) {
+        this.listeRef = listeRef;
     }
 
 }

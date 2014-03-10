@@ -7,12 +7,13 @@ package codebase;
 
 import blague.Blague;
 import exception.BlagueAbsenteException;
+import java.rmi.Remote;
 
 /**
  *
  * @author blaise
  */
-public interface BlagueProviderPairApair {
+public interface BlagueProviderPairApair extends Remote {
 
     /**
      * récupère le nom du blagueprovider
