@@ -14,6 +14,8 @@ import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.rmi.NotBoundException;
+import java.util.Iterator;
+import java.util.Set;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -24,8 +26,6 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-
-
 
 public class InterfaceGraphique extends JFrame {
 
@@ -81,6 +81,7 @@ public class InterfaceGraphique extends JFrame {
         //la partie blague distante
         JPanel PblaguesDistantes = new JPanel();
         blaguesDistantes = new JList();
+        MaJServeurs();
         blaguesDistantes.setPreferredSize(new Dimension(300, 200));
         PblaguesDistantes.add(blaguesDistantes);
         //ajoute ? la boite
@@ -92,6 +93,34 @@ public class InterfaceGraphique extends JFrame {
 
         //encapsuler dans un jpanel
         pdistant.add(distant);
+
+        serveurs.addMouseListener(new MouseListener() {
+
+            @Override
+            public void mouseClicked(MouseEvent me) {
+            }
+
+            @Override
+            public void mousePressed(MouseEvent me) {
+                //Mise à jour de la liste des blagues distantes
+                MaJBlagueDist();
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent me) {
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent me) {
+            }
+
+            @Override
+            public void mouseExited(MouseEvent me) {
+            }
+
+        });
+
+        pdistant.repaint();
         return (pdistant);
     }
 
@@ -139,7 +168,7 @@ public class InterfaceGraphique extends JFrame {
         blocal.add(bouton);
 
         local.add(blocal);
-        
+
         blaguesLocales.addMouseListener(new MouseListener() {
 
             @Override
@@ -157,7 +186,7 @@ public class InterfaceGraphique extends JFrame {
                 } catch (BlagueAbsenteException ex) {
                     Logger.getLogger(InterfaceGraphique.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                
+
             }
 
             @Override
@@ -171,9 +200,9 @@ public class InterfaceGraphique extends JFrame {
             @Override
             public void mouseExited(MouseEvent me) {
             }
-            
+
         });
-        
+
         local.repaint();
         return (local);
     }
@@ -214,7 +243,20 @@ public class InterfaceGraphique extends JFrame {
      * quand lisRef est modifi�
      */
     public void MaJServeurs() {
+        //Création d'un tableau contenant les noms des serveurs
+        String[] tabServeurs = new String[bp.getListeRef().size()];
 
+        //Parcourt de la HashMap via un itérateur
+        Set cles = bp.getListeRef().keySet();
+        Iterator it = cles.iterator();
+        int iterateurRes = 0;
+        while (it.hasNext()) {
+            String cle = (String) it.next();
+            tabServeurs[iterateurRes] = cle;
+            iterateurRes++;
+        }
+        //Remplissage de l'attribut serveurs avec la liste de noms
+        serveurs.setListData(tabServeurs);
     }
 
     /**
@@ -222,7 +264,16 @@ public class InterfaceGraphique extends JFrame {
      * on selectionne un listeref
      */
     public void MaJBlagueDist() {
-
+        //Récupération du nom du serveur actuellement sélectionné
+        String nomserveur = (String) serveurs.getSelectedValue();
+        //Récupération du serveur à partir du nom
+        BlagueProviderPairApair serveur = bp.getListeRef().get(nomserveur);
+        try {
+            //Remplissage de l'attribut blaguesDistantes avec le nom des blagues
+            blaguesDistantes.setListData(serveur.getAllNames());
+        } catch (RemoteException ex) {
+            Logger.getLogger(InterfaceGraphique.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -261,10 +312,10 @@ public class InterfaceGraphique extends JFrame {
 
                 //testUnitaire(args[0], bp);
                 System.out.println("Client lancé !");
-                
+
                 bp.ajoutBlague(new Blague("nom1", "question1", "reponse1"));
                 bp.ajoutBlague(new Blague("nom2", "question2", "reponse2"));
-                
+
                 // Création de l'interface
                 InterfaceGraphique ig = new InterfaceGraphique(bp.getNom(), bp);
 

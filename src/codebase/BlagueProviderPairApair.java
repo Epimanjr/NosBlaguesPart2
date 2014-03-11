@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package codebase;
 
 import blague.Blague;
@@ -12,7 +7,8 @@ import java.rmi.RemoteException;
 
 /**
  *
- * @author blaise
+ * @author Maxime Blaise
+ * @author Antoine Nosal
  */
 public interface BlagueProviderPairApair extends Remote {
 
