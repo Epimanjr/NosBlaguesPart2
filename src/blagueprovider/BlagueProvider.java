@@ -81,10 +81,10 @@ public class BlagueProvider implements BlagueProviderPairApair {
 
         try {
             //On récupère la blague
-            Blague b = getBlague(nomBlague);
+            Blague b = ref.getBlague(nomBlague);
 
             //On l'ajoute à la référence distance
-            ref.ajoutBlague(b);
+            this.ajoutBlague(b);
 
         } catch (BlagueAbsenteException ex) {
             Logger.getLogger(BlagueProvider.class.getName()).log(Level.SEVERE, null, ex);
