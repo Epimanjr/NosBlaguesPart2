@@ -33,8 +33,7 @@ public class BlagueProvider implements BlagueProviderPairApair {
     private HashMap<String, Blague> listeBlagues;
 
     /**
-     * le nom des autres BlagueProvider connus à leurs références distantes (ces
-     * références sont à récupérer au lancement de l’application)
+     * le nom des autres BlagueProvider connus à leurs références distantes (ces références sont à récupérer au lancement de l’application)
      */
     private HashMap<String, BlagueProviderPairApair> listeRef;
 
@@ -56,7 +55,7 @@ public class BlagueProvider implements BlagueProviderPairApair {
      * @param b
      */
     public void ajoutBlague(Blague b) {
-        
+
         //On ajoute b à la hashmap
         listeBlagues.put(b.getNom(), b);
     }
@@ -77,14 +76,18 @@ public class BlagueProvider implements BlagueProviderPairApair {
      * @param ref
      * @param nomBlague
      */
-    public void telechargeBlague(BlagueProvider ref, String nomBlague) {
+    public void telechargeBlague(BlagueProviderPairApair ref, String nomBlague) {
 
         try {
             //On récupère la blague
-            Blague b = ref.getBlague(nomBlague);
-
-            //On l'ajoute à la référence distance
-            this.ajoutBlague(b);
+            Blague b;
+            try {
+                b = ref.getBlague(nomBlague);
+                //On l'ajoute à la référence distance
+                this.ajoutBlague(b);
+            } catch (RemoteException ex) {
+                Logger.getLogger(BlagueProvider.class.getName()).log(Level.SEVERE, null, ex);
+            }
 
         } catch (BlagueAbsenteException ex) {
             Logger.getLogger(BlagueProvider.class.getName()).log(Level.SEVERE, null, ex);
@@ -104,7 +107,7 @@ public class BlagueProvider implements BlagueProviderPairApair {
      */
     @Override
     public String[] getAllNames() {
-        
+
         //Création du tableau résultat
         String[] res = new String[listeBlagues.size()];
 
@@ -123,7 +126,6 @@ public class BlagueProvider implements BlagueProviderPairApair {
             iterateurRes++;
         }
 
-    
         return res;
     }
 
@@ -201,7 +203,7 @@ public class BlagueProvider implements BlagueProviderPairApair {
                 client.ajoutBlague(new Blague("blague5", "question5", "reponse5"));
                 break;
             case "test":
-                
+
                 client.ajoutBlague(new Blague("blague2", "question2", "reponse2"));
                 client.ajoutBlague(new Blague("blague3", "question3", "reponse3"));
                 client.ajoutBlague(new Blague("blague6", "question6", "reponse6"));
