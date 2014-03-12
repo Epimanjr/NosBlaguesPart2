@@ -105,6 +105,10 @@ public class InterfaceGraphique extends JFrame {
                 BlagueProviderPairApair ref = bp.getListeRef().get(nomref);
                 
                 bp.telechargeBlague(ref, nomblague);
+                
+                // Mise à jour des blagues locales
+                MaJBlagues();
+                
             }
         });
         distant.add(bouton);
