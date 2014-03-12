@@ -104,7 +104,7 @@ public class InterfaceGraphique extends JFrame {
                 String nomref = (String) serveurs.getSelectedValue();
                 BlagueProviderPairApair ref = bp.getListeRef().get(nomref);
                 
-                bp.telechargeBlague((BlagueProvider) ref, nomblague);
+                bp.telechargeBlague(ref, nomblague);
             }
         });
         distant.add(bouton);
