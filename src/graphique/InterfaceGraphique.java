@@ -11,6 +11,8 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.rmi.NotBoundException;
@@ -131,7 +133,7 @@ public class InterfaceGraphique extends JFrame {
      */
     public JPanel ongletLocal() {
         //l'onglet local
-        JPanel local = new JPanel();
+        final JPanel local = new JPanel();
         Box blocal = new Box(BoxLayout.Y_AXIS);
 
         //etiquette 1
@@ -165,6 +167,25 @@ public class InterfaceGraphique extends JFrame {
 
         //bouton de sauvegarde
         JButton bouton = new JButton("sauve");
+        
+        // Ajout Listener sur sauve
+        bouton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                // Création de la blague
+                Blague b = new Blague(nom.getText(), question.getText(), reponse.getText());
+                
+                // Ajout à bp
+                bp.ajoutBlague(b);
+                
+                // Mise à jour des blagues
+                MaJBlagues();
+                
+                local.repaint();
+            }
+        });
+        
         blocal.add(bouton);
 
         local.add(blocal);
