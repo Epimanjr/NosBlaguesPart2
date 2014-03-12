@@ -91,6 +91,22 @@ public class InterfaceGraphique extends JFrame {
 
         // bouton de sauvegarde
         JButton bouton = new JButton("telecharge");
+        
+        // Ajout du listener sur telecharge
+        bouton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                // On récupère le nom de la blague
+                String nomblague = (String) blaguesDistantes.getSelectedValue();
+                
+                // On récupère la ref
+                String nomref = (String) serveurs.getSelectedValue();
+                BlagueProviderPairApair ref = bp.getListeRef().get(nomref);
+                
+                bp.telechargeBlague((BlagueProvider) ref, nomblague);
+            }
+        });
         distant.add(bouton);
 
         //encapsuler dans un jpanel
